@@ -1,5 +1,6 @@
 "use strict";
 const K={jobs:"empleaya_jobs_v1",applications:"empleaya_applications_v1",favorites:"empleaya_favorites_v1"};
+const THEME_KEY="empleaya_theme_v1";
 const ALL_MODALS=["jobDetailModal","applicationModal","candidatesModal","confirmModal","successModal"];
 const JOBS_PER_PAGE=5;
 let jobsPage=1;
@@ -58,6 +59,10 @@ function exportData(){const data={app:"EmpleaYa",version:1,exportedAt:new Date()
 function importData(e){const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.jobs)||!Array.isArray(d.applications)||!Array.isArray(d.favorites))throw new Error("formato");const cleanJobs=d.jobs.filter(j=>j&&j.title&&j.company&&j.description).slice(0,500);if(!cleanJobs.length)throw new Error("vacio");save(K.jobs,cleanJobs);save(K.applications,d.applications.slice(0,2000));save(K.favorites,d.favorites.slice(0,1000));jobsPage=1;renderJobs(true);renderApplications();renderRecruiterJobs();stats();toast(`Importados ${cleanJobs.length} empleos.`,"success")}catch{toast("Archivo inválido. Debe ser un backup de EmpleaYa.","error")}e.target.value=""};r.readAsText(f)}
 function stats(){document.getElementById("totalJobsStat").textContent=jobs().length;document.getElementById("totalApplicationsStat").textContent=apps().length;updateBadges()}
 function updateBadges(){const nApps=apps().length,badge=document.getElementById("navAppsBadge");if(badge){badge.textContent=nApps;badge.classList.toggle("hidden",nApps===0)}const favLabel=document.getElementById("favCountLabel");if(favLabel)favLabel.textContent=`(${favs().length})`}
+function isDark(){return document.documentElement.classList.contains("dark")}
+function applyTheme(t){document.documentElement.classList.toggle("dark",t==="dark");try{localStorage.setItem(THEME_KEY,t)}catch(e){}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute("content",t==="dark"?"#0f172a":"#2563eb");document.querySelectorAll(".themeBtn").forEach(b=>{b.textContent=t==="dark"?"☀️":"🌙";b.setAttribute("aria-label",t==="dark"?"Cambiar a modo claro":"Cambiar a modo oscuro")})}
+function initTheme(){let t="light";try{t=localStorage.getItem(THEME_KEY)||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}applyTheme(t)}
+function toggleTheme(){applyTheme(isDark()?"light":"dark")}
 function updateCounts(){const s=(id,out,max)=>{const el=document.getElementById(id),o=document.getElementById(out);if(el&&o)o.textContent=(el.value||"").length};s("description","descCount");s("requirements","reqCount");s("benefits","benCount");s("appMessage","msgCount")}
 function clearFilters(){document.getElementById("searchInput").value="";document.getElementById("categoryFilter").value="";document.getElementById("sortFilter").value="recent";["fullTimeFilter","partTimeFilter","contractFilter","freelanceFilter","internshipFilter"].forEach(id=>{document.getElementById(id).checked=false});document.getElementById("favOnlyFilter").checked=false;document.querySelectorAll('input[name="modality"]').forEach(x=>x.checked=x.value==="");renderJobs(true)}
 function anyModalOpen(){return ALL_MODALS.some(id=>!document.getElementById(id).classList.contains("hidden"))}
@@ -68,6 +73,5 @@ function toast(msg,type){type=type||"success";const c=document.getElementById("t
 function esc(x){return String(x??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 document.addEventListener("click",e=>{ALL_MODALS.forEach(id=>{const m=document.getElementById(id);if(!m.classList.contains("hidden")&&e.target===m)closeModal(id)})});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")ALL_MODALS.forEach(id=>{if(!document.getElementById(id).classList.contains("hidden"))closeModal(id)});if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();switchView("jobs");setTimeout(()=>document.getElementById("searchInput").focus(),100)}if(e.key==="Tab"){const m=topModal();if(m){const f=[...m.querySelectorAll("button,input,select,textarea,a[href]")].filter(el=>!el.disabled&&el.offsetParent!==null);if(f.length){const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}}}});
-document.addEventListener("DOMContentLoaded",()=>{init();renderJobs(true);renderApplications();renderRecruiterJobs();stats();updateCounts()});
-window.addEventListener("storage",()=>{renderJobs(false);renderApplications();renderRecruiterJobs();stats()});
+document.addEventListener("DOMContentLoaded",()=>{init();initTheme();renderJobs(true);renderApplications();renderRecruiterJobs();stats();updateCounts()});window.addEventListener("storage",()=>{renderJobs(false);renderApplications();renderRecruiterJobs();stats()});
 window.addEventListener("resize",()=>{if(window.innerWidth>=768)document.getElementById("mobileMenu").classList.add("hidden")});
