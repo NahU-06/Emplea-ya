@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="#1243b0">
 <title>EmpleaYa — Plataforma de Empleo</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",100:"#dbeafe",200:"#bfdbfe",300:"#93c5fd",400:"#60a5fa",500:"#3b82f6",600:"#2563eb",700:"#1d4ed8",800:"#1e40af",900:"#1e3a8a"}},boxShadow:{soft:"0 10px 40px rgba(15,23,42,.08)"}}}};
+tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",100:"#dbeafe",200:"#bfdbfe",300:"#93c5fd",400:"#60a5fa",500:"#3b82f6",600:"#1243b0",700:"#1d4ed8",800:"#1e40af",900:"#1e3a8a"}},boxShadow:{soft:"0 10px 40px rgba(15,23,42,.08)"}}}};
 </script>
-<script>(function(){try{var t=localStorage.getItem("empleaya_theme_v1");if(!t)t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}})();</script></script>
+<script>(function(){try{var t=localStorage.getItem("empleaya_theme_v1");if(!t)t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}})();</script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="text-slate-800">
@@ -24,9 +24,11 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <nav class="hidden md:flex items-center gap-2" aria-label="Navegación principal">
 <button id="navJobs" onclick="switchView('jobs')" class="px-4 py-2 rounded-lg text-sm font-semibold text-primary-700 bg-primary-50">Buscar empleo</button>
 <button id="navApps" onclick="switchView('applications')" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100">Mis postulaciones <span id="navAppsBadge" class="hidden ml-1 px-2 py-0.5 rounded-full bg-primary-600 text-white text-xs">0</span></button>
-<button id="navRecruiter" onclick="switchView('recruiter')" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100">Soy reclutador</button> <button onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-xl border border-slate-200 bg-white text-lg hover:bg-slate-50" aria-label="Cambiar a modo oscuro">🌙</button>
+<button id="navRecruiter" onclick="switchView('recruiter')" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100">Soy reclutador</button>
+<button onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-xl border border-slate-200 bg-white text-lg hover:bg-slate-50" aria-label="Cambiar a modo oscuro">🌙</button>
 </nav>
 <div class="md:hidden flex items-center gap-1"><button onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-lg hover:bg-slate-100 text-xl" aria-label="Cambiar tema">🌙</button><button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-slate-100 text-xl" aria-label="Abrir menú" aria-expanded="false" id="menuBtn">☰</button></div>
+</div>
 <div id="mobileMenu" class="hidden md:hidden pb-3">
 <button onclick="switchView('jobs');toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-100 font-semibold">Buscar empleo</button>
 <button onclick="switchView('applications');toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-100 font-semibold">Mis postulaciones</button>
