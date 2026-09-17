@@ -1,19 +1,24 @@
 <!DOCTYPE html>
+<!-- EmpleaYa: bolsa de empleo local (sin backend, todo en el navegador con localStorage) -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1243b0">
 <title>EmpleaYa — Plataforma de Empleo</title>
+<!-- Tailwind por CDN + paleta corporativa (primary) y modo oscuro por clase -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",100:"#dbeafe",200:"#bfdbfe",300:"#93c5fd",400:"#60a5fa",500:"#3b82f6",600:"#1243b0",700:"#1d4ed8",800:"#1e40af",900:"#1e3a8a"}},boxShadow:{soft:"0 10px 40px rgba(15,23,42,.08)"}}}};
 </script>
+<!-- Aplica el tema guardado antes de pintar, para evitar parpadeo claro/oscuro -->
 <script>(function(){try{var t=localStorage.getItem("empleaya_theme_v1");if(!t)t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}})();</script>
+<!-- Estilos propios: componentes, animaciones y modo oscuro -->
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="text-slate-800">
 
+<!-- CABECERA fija: logo, navegación por vistas (candidato/reclutador) y botón de tema -->
 <header class="sticky top-0 z-40 border-b border-slate-200 glass">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 <div class="h-16 flex items-center justify-between">
@@ -21,12 +26,14 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">💼</div>
 <div class="text-left"><div class="font-black text-lg leading-none">Emplea<span class="text-primary-600">Ya</span></div><div class="text-[10px] text-slate-500 font-medium">Talento + oportunidades</div></div>
 </button>
+<!-- Menú escritorio: cambia entre las 3 vistas sin recargar -->
 <nav class="hidden md:flex items-center gap-2" aria-label="Navegación principal">
 <button id="navJobs" onclick="switchView('jobs')" class="px-4 py-2 rounded-lg text-sm font-semibold text-primary-700 bg-primary-50">Buscar empleo</button>
 <button id="navApps" onclick="switchView('applications')" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100">Mis postulaciones <span id="navAppsBadge" class="hidden ml-1 px-2 py-0.5 rounded-full bg-primary-600 text-white text-xs">0</span></button>
 <button id="navRecruiter" onclick="switchView('recruiter')" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100">Soy reclutador</button>
 <button onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-xl border border-slate-200 bg-white text-lg hover:bg-slate-50" aria-label="Cambiar a modo oscuro">🌙</button>
 </nav>
+<!-- Menú móvil: mismos destinos + cambio de tema -->
 <div class="md:hidden flex items-center gap-1"><button onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-lg hover:bg-slate-100 text-xl" aria-label="Cambiar tema">🌙</button><button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-slate-100 text-xl" aria-label="Abrir menú" aria-expanded="false" id="menuBtn">☰</button></div>
 </div>
 <div id="mobileMenu" class="hidden md:hidden pb-3">
@@ -37,7 +44,9 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 </div>
 </header>
 
+<!-- VISTA 1: buscar empleo (héroe + buscador + filtros + lista con paginación) -->
 <main id="jobsView">
+<!-- Héroe y barra de búsqueda (texto + categoría) -->
 <section class="relative overflow-hidden bg-gradient-to-br from-primary-700 via-primary-600 to-indigo-700 text-white">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
 <div class="max-w-3xl">
@@ -57,6 +66,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 <div class="flex flex-col lg:flex-row gap-8">
+<!-- Filtros laterales: modalidad, tipo de empleo y solo guardados -->
 <aside class="lg:w-64 shrink-0"><div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm lg:sticky lg:top-24">
 <div class="flex items-center justify-between mb-5"><h2 class="font-bold">Filtros</h2><button onclick="clearFilters()" class="text-xs font-semibold text-primary-600">Limpiar</button></div>
 <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Modalidad</p>
@@ -75,6 +85,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <div class="border-t border-slate-100 mt-5 pt-5"><button onclick="switchView('recruiter')" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold">＋ Publicar empleo</button></div>
 </div></aside>
 
+<!-- Lista de resultados: la llena app.js + estado vacío + botón mostrar más -->
 <div class="flex-1 min-w-0">
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5"><div><h2 class="text-2xl font-black">Ofertas de empleo</h2><p id="resultsCount" class="text-sm text-slate-500 mt-1"></p></div>
 <label for="sortFilter" class="sr-only">Ordenar</label><select id="sortFilter" onchange="renderJobs(true)" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"><option value="recent">Más recientes</option><option value="old">Más antiguas</option><option value="salary">Mayor salario</option></select></div>
@@ -84,6 +95,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 </div></div></section>
 </main>
 
+<!-- VISTA 2: mis postulaciones (lo que el candidato envió en este navegador) -->
 <main id="applicationsView" class="hidden">
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
@@ -95,10 +107,12 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 </section>
 </main>
 
+<!-- VISTA 3: panel reclutador (publicar/editar + resumen + datos + administrar) -->
 <main id="recruiterView" class="hidden">
 <section class="bg-gradient-to-br from-slate-900 to-slate-800 text-white"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14"><span class="inline-flex px-3 py-1 rounded-full bg-white/10 text-blue-200 text-sm font-semibold mb-4">Panel de reclutadores</span><h1 class="text-4xl sm:text-5xl font-black">Encontrá al próximo talento de tu equipo.</h1><p class="mt-4 text-slate-300 text-lg">Publicá una oferta laboral y hacela visible para candidatos.</p></div></section>
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 <div class="grid lg:grid-cols-[1fr_350px] gap-8">
+<!-- Formulario: sirve para publicar y para editar (lo cambia app.js) -->
 <div id="jobFormCard" class="bg-white rounded-2xl border border-slate-200 shadow-soft p-6 sm:p-8">
 <h2 id="formTitle" class="text-2xl font-black">Publicar una oferta</h2><p class="text-sm text-slate-500 mt-1 mb-7">Completá los datos del puesto para publicarlo.</p>
 <form id="jobForm" onsubmit="publishJob(event)" class="space-y-6" novalidate>
@@ -117,12 +131,15 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <div><label for="benefits" class="block text-sm font-bold mb-2">Beneficios</label><textarea id="benefits" maxlength="1500" rows="3" oninput="updateCounts()" class="w-full px-4 py-3 rounded-xl border border-slate-200" placeholder="Obra social, capacitaciones, horario flexible..."></textarea><p class="text-xs text-slate-400 text-right mt-1"><span id="benCount">0</span>/1500</p></div>
 <div class="flex flex-col sm:flex-row gap-3"><button id="submitJobBtn" type="submit" class="flex-1 h-12 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold">Publicar empleo</button><button id="cancelEditBtn" type="button" onclick="cancelEdit()" class="hidden h-12 px-6 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 font-semibold">Cancelar edición</button><button type="button" onclick="document.getElementById('jobForm').reset();updateCounts()" class="h-12 px-6 rounded-xl border border-slate-200 font-semibold">Limpiar</button></div>
 </form></div>
+<!-- Lateral: contadores + copia de seguridad local (exportar/importar/restablecer/borrar) -->
 <aside class="space-y-5"><div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"><h3 class="font-black text-lg">Resumen</h3><div class="grid grid-cols-2 gap-3 mt-5"><div class="bg-primary-50 rounded-xl p-4"><div id="totalJobsStat" class="text-2xl font-black text-primary-700">0</div><div class="text-xs text-slate-500 mt-1">Empleos publicados</div></div><div class="bg-emerald-50 rounded-xl p-4"><div id="totalApplicationsStat" class="text-2xl font-black text-emerald-700">0</div><div class="text-xs text-slate-500 mt-1">Postulaciones</div></div></div></div><div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"><h3 class="font-black text-lg">Datos locales</h3><p class="text-xs text-slate-500 mt-1 mb-4">Copia de seguridad y mantenimiento.</p><div class="grid grid-cols-2 gap-2"><button onclick="exportData()" class="h-10 rounded-xl border border-slate-200 text-sm font-bold hover:bg-slate-50">⬇ Exportar</button><button onclick="document.getElementById('importFile').click()" class="h-10 rounded-xl border border-slate-200 text-sm font-bold hover:bg-slate-50">⬆ Importar</button><button onclick="requestReset()" class="h-10 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-sm font-bold">↺ Ejemplos</button><button onclick="requestWipe()" class="h-10 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm font-bold">Borrar todo</button></div><input type="file" id="importFile" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><div class="bg-blue-50 border border-blue-100 rounded-2xl p-6"><h3 class="font-bold">Publicación local</h3><p class="text-sm text-slate-600 mt-2">Los empleos se almacenan exclusivamente en este navegador mediante localStorage.</p></div></aside>
 </div>
+<!-- Grilla de empleos del reclutador: editar, ver candidatos y eliminar -->
 <div class="mt-12"><h2 class="text-2xl font-black">Administrar publicaciones</h2><p class="text-sm text-slate-500 mt-1 mb-5">Editá, mirá candidatos o eliminá empleos publicados en este navegador.</p><div id="recruiterJobsContainer" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div></div>
 </section>
 </main>
 
+<!-- MODAL detalle del empleo: se rellena con detail() al hacer clic en una tarjeta -->
 <div id="jobDetailModal" role="dialog" aria-modal="true" aria-label="Detalle del empleo" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
 <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl fade-in">
 <div class="relative bg-gradient-to-br from-primary-600 to-indigo-700 text-white p-6 sm:p-8"><button onclick="closeModal('jobDetailModal')" class="absolute right-4 top-4 w-9 h-9 rounded-full bg-white/15" aria-label="Cerrar detalle">✕</button><div id="detailIcon" class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center text-xl font-black mb-4"></div><h2 id="detailTitle" class="text-2xl sm:text-3xl font-black"></h2><p id="detailCompany" class="text-blue-100 mt-1"></p></div>
@@ -130,6 +147,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <div class="border-t border-slate-100 p-5 sm:p-6 flex flex-col sm:flex-row gap-3"><button id="detailApplyButton" class="flex-1 h-12 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold">Postularme a este empleo</button><button id="detailFavoriteButton" class="h-12 px-5 rounded-xl border border-slate-200 font-semibold">☆ Guardar</button></div>
 </div></div>
 
+<!-- MODAL postulación: formulario del candidato, lo procesa submitApplication() -->
 <div id="applicationModal" role="dialog" aria-modal="true" aria-label="Formulario de postulación" class="hidden fixed inset-0 z-[60] modal-backdrop items-center justify-center p-4">
 <div class="bg-white rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl fade-in">
 <div class="p-6 border-b border-slate-100 flex items-center justify-between"><div><h2 class="text-xl font-black">Postularme</h2><p id="applicationJobName" class="text-sm text-slate-500 mt-1"></p></div><button onclick="closeModal('applicationModal')" class="w-9 h-9 rounded-full hover:bg-slate-100" aria-label="Cerrar postulación">✕</button></div>
@@ -142,12 +160,14 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <button id="submitAppBtn" type="submit" class="w-full h-12 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold">Enviar postulación</button>
 </form></div></div>
 
+<!-- MODAL candidatos: lista de postulados de un empleo, la llena renderCandidates() -->
 <div id="candidatesModal" role="dialog" aria-modal="true" aria-label="Candidatos" class="hidden fixed inset-0 z-[65] modal-backdrop items-center justify-center p-4">
 <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl fade-in flex flex-col">
 <div class="p-6 border-b border-slate-100 flex items-start justify-between gap-3"><div><h2 class="text-xl font-black">Candidatos</h2><p id="candidatesJobName" class="text-sm text-slate-500 mt-1"></p></div><button onclick="closeModal('candidatesModal')" class="w-9 h-9 shrink-0 rounded-full hover:bg-slate-100" aria-label="Cerrar candidatos">✕</button></div>
 <div id="candidatesContainer" class="p-6 overflow-y-auto space-y-4"></div>
 </div></div>
 
+<!-- MODAL genérico de confirmación: eliminar, retirar, restablecer o borrar (confirmAction) -->
 <div id="confirmModal" role="dialog" aria-modal="true" aria-label="Confirmar acción" class="hidden fixed inset-0 z-[80] modal-backdrop items-center justify-center p-4">
 <div class="bg-white rounded-2xl w-full max-w-md p-8 text-center shadow-2xl fade-in">
 <div id="confirmIcon" class="w-14 h-14 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl mb-4">🗑</div>
@@ -155,12 +175,15 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:{50:"#eff6ff",1
 <div class="flex gap-3 mt-6"><button onclick="closeModal('confirmModal')" class="flex-1 h-11 rounded-xl border border-slate-200 font-bold">Cancelar</button><button id="confirmBtn" onclick="confirmAction()" class="flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold">Eliminar</button></div>
 </div></div>
 
+<!-- MODAL éxito + contenedor de avisos toast + pie -->
 <div id="successModal" role="dialog" aria-modal="true" aria-label="Postulación exitosa" class="hidden fixed inset-0 z-[70] modal-backdrop items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md p-8 text-center shadow-2xl fade-in"><div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mb-5">✓</div><h2 class="text-2xl font-black">¡Postulación enviada!</h2><p class="text-slate-500 mt-2">Tu postulación fue registrada correctamente en este navegador.</p><div class="flex gap-3 mt-6"><button onclick="closeModal('successModal')" class="flex-1 h-11 rounded-xl border border-slate-200 font-bold">Continuar</button><button onclick="closeModal('successModal');switchView('applications')" class="flex-1 h-11 rounded-xl bg-slate-900 text-white font-bold">Ver mis postulaciones</button></div></div></div>
 
 <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] space-y-3 max-w-sm" aria-live="polite"></div>
 
 <footer class="border-t border-slate-200 bg-white mt-10"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4"><div><div class="font-black">Emplea<span class="text-primary-600">Ya</span></div><p class="text-xs text-slate-400 mt-1">Plataforma local de oportunidades laborales.</p></div><div class="text-xs text-slate-400">Datos almacenados localmente en tu navegador.</div></div></footer>
 
+<!-- Lógica de la app: vistas, filtros, empleos, postulaciones, tema y modales -->
 <script src="app.js" defer></script>
 </body>
 </html>
+ 
